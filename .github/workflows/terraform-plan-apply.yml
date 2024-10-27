@@ -21,7 +21,7 @@ env:
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_AZUREAD: "true"
   ARM_USE_OIDC: "true"
-  TF_VAR_STORAGE_ACCOUNT_NAME: "${{ vars.TF_STORAGE_NAME }}"
+  TF_VAR_STORAGE_ACCOUNT_NAME: "${{ secrets.TF_STORAGE_NAME }}"
   TF_VAR_RESOURCE_GROUP_NAME: "${{ vars.TF_RG_NAME }}"
   TF_VAR_CONTAINER_NAME: "${{ vars.TF_CONTAINER_NAME }}"
   TF_VAR_KEY: "${{ vars.TF_KEY_BLOB_NAME }}"
@@ -29,8 +29,7 @@ env:
 jobs:
   terraform-plan:
     name: 'Terraform Plan'
-    runs-on: ubuntu-latest
-    environment: production    
+    runs-on: ubuntu-latest  
     env:
       #this is needed since we are running terraform with read-only permissions
       ARM_SKIP_PROVIDER_REGISTRATION: true
