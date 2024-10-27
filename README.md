@@ -1,39 +1,43 @@
-# Azure Authentication with OIDC and Service Principal using Terraform
+# Terraform Azure Authentication with Service Principal and Federated Identity
 
-This repository provides a comprehensive example demonstrating how to authenticate to Azure using OpenID Connect (OIDC) and a service principal while running Terraform.
+This repository provides an example of how to authenticate to Azure using a service principal with federated identity while running Terraform.
 
-## Key Components
+## Prerequisites
 
-### Azure Authentication
-- **OIDC (OpenID Connect)**: An identity layer built on top of the OAuth 2.0 protocol. It allows clients to verify the identity of the end-user based on the authentication performed by an authorization server.
-- **Service Principal**: A security identity used by applications, services, and automation tools to access specific Azure resources. It can be thought of as a user identity (username and password or certificate) with a role and permissions to access resources.
+- Azure subscription
+- Azure CLI installed
+- Terraform installed
 
-### Terraform
-- **Infrastructure as Code (IaC)**: Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. It can manage existing and popular service providers as well as custom in-house solutions.
-- **Running Terraform**: The example in the repository shows how to configure Terraform scripts to use the authenticated session to deploy and manage Azure resources.
+## Steps
 
-## Detailed Steps
+### 1. Create an Azure AD Application and Service Principal
 
-### 1. Setting Up OIDC
-- Configure your identity provider (e.g., Azure AD) to support OIDC.
-- Register your application with the identity provider to obtain the necessary client ID and secret.
+First, create an Azure AD application and service principal.
 
-### 2. Creating a Service Principal
-- In Azure, create a service principal that Terraform will use to authenticate and perform actions.
-- Assign the necessary roles and permissions to the service principal to ensure it has the required access to manage resources.
+```sh
+az ad sp create-for-rbac --name "<service_principal_name>" --role Contributor --scopes /subscriptions/<subscription_id>
 
-### 3. Configuring Terraform
-- Update your Terraform configuration files to include the necessary provider settings for Azure.
-- Use the client ID, client secret, and other details from the service principal to authenticate Terraform with Azure.
+Take note of the appId, password, and tenant values from the output. These will be used as the client_id, client_secret, and tenant_id respectively.
 
-### 4. Running Terraform Scripts
-- Execute Terraform commands (`terraform init`, `terraform plan`, `terraform apply`) to deploy and manage your infrastructure.
-- Terraform will use the authenticated session to interact with Azure resources securely.
+### 2. Configure Federated Identity Credential
 
-This detailed example helps users understand the process of securely authenticating to Azure and managing resources using Terraform, leveraging modern authentication protocols and best practices.
+Navigate to the Azure AD application in the Azure portal, go to Certificates & secrets, and then to the Federated credentials tab. Click + Add Credential and configure it to trust your GitHub repository.
 
-## Contributing
-Feel free to open issues or submit pull requests if you have any improvements or suggestions.
+### 3. Set Up Terraform Configuration
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+Create a main.tf file with the following content:
+
+```sh
+provider "azurerm" {
+  features {}
+
+  client_id       = var.client_id
+  client_secret   = var.client_secret
+  tenant_id       = var.tenant_id
+  subscription_id = var.subscription_id
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
+}
