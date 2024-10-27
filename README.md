@@ -84,10 +84,6 @@ terraform init
 terraform apply
 ```
 
-## Contributing
-
-Feel free to open issues or submit pull requests if you have any improvements or suggestions.
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
